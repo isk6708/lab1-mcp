@@ -1,0 +1,6 @@
+2026/11/01-21:35:17.815 7080 Reusing MANIFEST C:\RajWork\2026\ESLearning\mcp\lab1\browser_profile\Default\EdgeCoupons/coupons_data.db/MANIFEST-000001
+2026/11/01-21:35:17.817 7080 Recovering log #10
+2026/11/01-21:35:17.817 7080 Reusing old log C:\RajWork\2026\ESLearning\mcp\lab1\browser_profile\Default\EdgeCoupons/coupons_data.db/000010.log 
+2026/11/01-21:35:17.857 6748 Level-0 table #14: started
+2026/11/01-21:35:17.861 6748 Level-0 table #14: 683444 bytes OK
+2026/11/01-21:35:17.863 6748 Delete type=0 #10

@@ -1,0 +1,104 @@
+{
+   "checksum": "3e5cb8a7af578fe89d222389d1a33ebf",
+   "roots": {
+      "bookmark_bar": {
+         "children": [ {
+            "date_added": "13438012100728824",
+            "date_last_used": "0",
+            "guid": "53397258-4c14-4bd1-9c54-7538e06ffbae",
+            "id": "8",
+            "name": "ASUS Software Portal - Exclusive technology",
+            "show_icon": false,
+            "source": "oem_preload",
+            "type": "url",
+            "url": "https://www.asus.com/Software-and-Innovations-Portal/",
+            "visit_count": 0
+         }, {
+            "date_added": "13438012100728328",
+            "date_last_used": "0",
+            "guid": "e57c7996-6fb8-42d2-a91b-9fe5b042baff",
+            "id": "7",
+            "name": "MyASUS Software - Get the best from ASUS PC",
+            "show_icon": false,
+            "source": "oem_preload",
+            "type": "url",
+            "url": "https://www.asus.com/ASUS-Software/",
+            "visit_count": 0
+         }, {
+            "children": [ {
+               "date_added": "13280201524474260",
+               "date_last_used": "0",
+               "guid": "449e702f-7a1f-4eff-b30d-5b214adcc323",
+               "id": "10",
+               "name": "ASUS Homepage",
+               "show_icon": false,
+               "source": "import_fre",
+               "type": "url",
+               "url": "http://www.asus.com/",
+               "visit_count": 0
+            }, {
+               "date_added": "13280201524521135",
+               "date_last_used": "0",
+               "guid": "8b4d2e2a-1c42-4645-8688-c34f33c555c3",
+               "id": "11",
+               "name": "ASUS Member",
+               "show_icon": false,
+               "source": "import_fre",
+               "type": "url",
+               "url": "https://account.asus.com/",
+               "visit_count": 0
+            } ],
+            "date_added": "13438012103819700",
+            "date_last_used": "0",
+            "date_modified": "0",
+            "guid": "be025893-eac0-4bbd-a834-b47dada0417c",
+            "id": "9",
+            "name": "ASUS E-Service",
+            "source": "import_fre",
+            "type": "folder"
+         } ],
+         "date_added": "13438012100518755",
+         "date_last_used": "0",
+         "date_modified": "13438012100728824",
+         "guid": "0bc5d13f-2cba-5d74-951f-3f233fe6c908",
+         "id": "1",
+         "name": "Favorites bar",
+         "source": "unknown",
+         "type": "folder"
+      },
+      "other": {
+         "children": [  ],
+         "date_added": "13438012100518755",
+         "date_last_used": "0",
+         "date_modified": "0",
+         "guid": "82b081ec-3dd3-529c-8475-ab6c344590dd",
+         "id": "2",
+         "name": "Other favorites",
+         "source": "unknown",
+         "type": "folder"
+      },
+      "synced": {
+         "children": [  ],
+         "date_added": "13438012100518755",
+         "date_last_used": "0",
+         "date_modified": "0",
+         "guid": "4cf2e351-0e85-532b-bb37-df045d8f8d0f",
+         "id": "3",
+         "name": "Mobile favorites",
+         "source": "unknown",
+         "type": "folder"
+      },
+      "workspaces_v2": {
+         "children": [  ],
+         "date_added": "13438012100518755",
+         "date_last_used": "0",
+         "date_modified": "0",
+         "guid": "75aa6670-344f-549d-b742-660f029506ab",
+         "id": "5",
+         "name": "Workspaces",
+         "source": "unknown",
+         "type": "folder"
+      }
+   },
+   "version": 1
+}

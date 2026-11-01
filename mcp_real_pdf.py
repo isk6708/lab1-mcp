@@ -7,10 +7,11 @@ Day 2 - Module 7: Integrating Business Systems (Production PDF File Scanner)
 import sys
 import os
 from pypdf import PdfReader
-from mcp.server.fastmcp import FastMCP
+# from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 
 # Initialize the PDF parsing server instance
-mcp = FastMCP("Production-PDF-Reader")
+mcp = MCPServer("Production-PDF-Reader")
 
 # Explicit file configuration target matching your local path parameters
 TARGET_PDF_PATH = r"C:\RajWork\2026\ESLearning\github\9781835468944.pdf"

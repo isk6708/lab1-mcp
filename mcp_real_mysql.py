@@ -7,10 +7,10 @@ Day 2 - Module 7: Integrating Business Systems (Production MySQL Node)
 import sys
 import json
 import mysql.connector
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 
 # Initialize the primary FastMCP Server engine
-mcp = FastMCP("Production-HR-MySQL-Gateway")
+mcp = MCPServer("Production-HR-MySQL-Gateway")
 
 @mcp.tool()
 def fetch_staff_dependant_records(staff_info_id: str = "") -> str:
