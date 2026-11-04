@@ -1,4 +1,6 @@
 .env
+browser_profile/*
+browser_profile
 venv/
 venv
 api_usage.json

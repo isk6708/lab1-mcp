@@ -18,31 +18,27 @@ MODEL = "llama3.2"
 
 
 SYSTEM_PROMPT = """
-You are an AI assistant connected to the JPPH document search system.
+You are a JPPH Document Search Assistant.
 
-You can search the authenticated JPPH production application
-using the MCP tool search_documents.
+You help users search documents using the JPPH MCP tools.
 
-Instructions:
+IMPORTANT RULES:
 
-1. Use search_documents when the user asks to find JPPH documents.
-2. Do not invent document titles, categories or dates.
-3. Base your answers on the actual search results.
-4. Report the number of matching records returned by JPPH.
-5. Present document titles, filenames, categories and dates clearly.
-6. If no records are found, explain that no matching results were returned.
-7. Do not claim that no records were found merely because
-   the extracted document list is empty.
-8. Check the returned status and total_results.
-   If total_results is null, explain that the search result
-   could not be verified.
-9. If total_results is zero, report that JPPH returned
-   zero matching records.
+1. Use MCP tool results as the only source of document information.
+2. Never invent document titles, dates, filenames or categories.
+3. Never claim that a successful search failed.
+4. Never claim zero results if documents are returned.
+5. If total_results is greater than zero, acknowledge the matching records.
+6. If a field is null, do not guess its value.
+7. Keep responses concise and clear.
+
+The application independently validates MCP results.
+Do not override the actual MCP result.
 """
 
 
 def extract_tool_text(result):
-    
+
     output = []
 
     for item in result.content:
@@ -71,6 +67,88 @@ def convert_mcp_tools(mcp_tools):
     return ollama_tools
 
 
+def parse_search_result(raw_text):
+
+    try:
+        data = json.loads(raw_text)
+
+        if not isinstance(data, dict):
+            raise ValueError("Unexpected MCP response format.")
+
+        return data
+
+    except (json.JSONDecodeError, ValueError) as error:
+
+        return {
+            "status": "error",
+            "message": f"Unable to parse MCP response: {error}",
+            "raw_response": raw_text
+        }
+
+
+def display_search_result(data):
+
+    print("\n========== JPPH SEARCH RESULTS ==========\n")
+
+    status = data.get("status")
+
+    if status != "success":
+
+        print("Search could not be completed.")
+        print("Status:", status)
+        print("Message:", data.get("message", "No additional information."))
+        return
+
+    total = data.get("total_results")
+    extracted = data.get("extracted_results", 0)
+    documents = data.get("documents", [])
+
+    if not isinstance(documents, list):
+        documents = []
+
+    if total == 0:
+
+        print("No matching JPPH records were found.")
+        return
+
+    if not isinstance(total, int) or total < 0:
+
+        print("The search result count could not be verified.")
+        return
+
+    print(f"Search query       : {data.get('query', '')}")
+    print(f"Total records      : {total}")
+    print(f"Records extracted  : {extracted}")
+
+    if not documents:
+
+        print("\nNo document details were extracted.")
+        return
+
+    print("\nMatching documents:\n")
+
+    for index, document in enumerate(documents, start=1):
+
+        print(f"{index}. {document.get('title') or 'Untitled document'}")
+        print(f"   Filename : {document.get('filename') or 'Not available'}")
+        print(f"   Category : {document.get('category') or 'Not available'}")
+        print(f"   Date     : {document.get('date') or 'Not available'}")
+
+        if document.get("document_path"):
+            print(f"   Document : {document['document_path']}")
+
+        print()
+
+    if total > len(documents):
+
+        print(
+            f"Note: Showing {len(documents)} extracted documents "
+            f"out of {total} matching records."
+        )
+
+    print("\n=========================================\n")
+
+
 async def ask_llama(session, tools, question):
 
     messages = [
@@ -84,88 +162,72 @@ async def ask_llama(session, tools, question):
         }
     ]
 
-    for attempt in range(5):
+    response = await asyncio.to_thread(
+        ollama.chat,
+        model=MODEL,
+        messages=messages,
+        tools=tools
+    )
 
-        response = await asyncio.to_thread(
-            ollama.chat,
-            model=MODEL,
-            messages=messages,
-            tools=tools
-        )
+    assistant_message = response.message
 
-        assistant_message = response.message
+    tool_calls = assistant_message.tool_calls or []
 
-        messages.append(
-            assistant_message.model_dump(exclude_none=True)
-        )
+    if not tool_calls:
 
-        tool_calls = assistant_message.tool_calls or []
+        print("\n========== LLAMA RESPONSE ==========\n")
+        print(assistant_message.content or "No response from the model.")
+        return
 
-        if not tool_calls:
+    for tool_call in tool_calls:
 
-            print("\n========== LLAMA RESPONSE ==========\n")
-            print(assistant_message.content)
-            return
+        tool_name = tool_call.function.name
+        arguments = tool_call.function.arguments
 
-        for tool_call in tool_calls:
+        print(f"\nCalling MCP tool: {tool_name}")
+        print("Arguments:", arguments)
 
-            tool_name = tool_call.function.name
-            arguments = tool_call.function.arguments
+        if tool_name != "search_documents":
 
-            print(f"\nCalling MCP tool: {tool_name}")
-            print("Arguments:", arguments)
+            print("This client only permits the search_documents tool.")
+            continue
 
-            if tool_name != "search_documents":
-                tool_output = {
-                    "status": "error",
-                    "message": "Tool not authorised by this client."
-                }
+        try:
 
-            else:
+            result = await session.call_tool(
+                tool_name,
+                arguments
+            )
 
-                try:
-                    result = await session.call_tool(
-                        tool_name,
-                        arguments
-                    )
+            raw_output = extract_tool_text(result)
 
-                    tool_output = extract_tool_text(result)
-                    print("\n========== RAW MCP TOOL RESULT ==========\n")
-                    print(tool_output)
-                    print("\n=========================================\n")
-                    
+            print("\n========== RAW MCP TOOL RESULT ==========\n")
+            print(raw_output)
+            print("\n=========================================\n")
 
-                    if result.isError:
-                        tool_output = {
-                            "status": "error",
-                            "message": tool_output
-                        }
+            # Check MCP execution status
+            if result.is_error:
 
-                except Exception as error:
+                print("MCP reported an execution error.")
+                print(raw_output)
+                continue
 
-                    tool_output = {
-                        "status": "error",
-                        "message": str(error)
-                    }
+            # Parse JSON returned by MCP
+            search_data = parse_search_result(raw_output)
 
-            if not isinstance(tool_output, str):
-                tool_output = json.dumps(
-                    tool_output,
-                    ensure_ascii=False
-                )
+            # Display actual JPPH results
+            display_search_result(search_data)
 
-            messages.append({
-                "role": "tool",
-                "tool_name": tool_name,
-                "content": tool_output
-            })
+        except Exception as error:
 
-    print("Maximum tool-calling iterations reached.")
+            print("\nMCP execution error:")
+            print(str(error))
 
 
 async def main():
 
     if not SERVER_PATH.exists():
+
         print("MCP server file not found:", SERVER_PATH)
         return
 
